@@ -12,13 +12,19 @@ function TodoCard() {
 
     const [todos, setTodos] = useState([]);
 
-    async function fetchTodoList() {
-        const response = await fetch("http://localhost:3000/todo");
-        const data = await response.json();
-        setTodos(data);
+    // GET, POST, PUT, DELETE
+    async function fetchTodos() {
+        try {
+            const res = await fetch("http://localhost:3000/todo");
+            const data = await res.json();
+            console.log(data);
+            setTodos(data);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-    useEffect(() => { fetchTodoList(); }, []);
+    useEffect(() => { fetchTodos() }, []);
 
     return (
         <div className="flex flex-col justify-center items-center gap-3 bg-white p-5 border-2 border-indigo-500 w-[300px]">
@@ -41,28 +47,33 @@ function TodoItem({ todo, todos, setTodos }) {
     async function handleTodoDone(e) {
         e.preventDefault();
 
-        const response = await fetch(`http://localhost:3000/todo/${todo._id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ done: !todo.done })
-        })
-        const data = await response.json();
-
-        const newTodos = todos.map((td) => {
-            if (td._id === data._id) return { ...data };
-            else return td;
-        });
-        setTodos(newTodos);
+        try {
+            const res = await fetch(`http://localhost:3000/todo/${todo._id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ done: !todo.done })
+            })
+            const data = await res.json();
+            const newTodos = todos.map((td) => {
+                if (td._id === data._id) return data;
+                else return td;
+            })
+            setTodos(newTodos);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     async function handleTodoDelete(e) {
         e.preventDefault();
-        const response = await fetch(`http://localhost:3000/todo/${todo._id}`, {
-            method: "DELETE"
-        });
-        const data = await response.json();
-        const newTodos = todos.filter((td) => td._id !== data._id);
-        setTodos(newTodos);
+        try {
+            const res = await fetch(`http://localhost:3000/todo/${todo._id}`, { method: "DELETE" });
+            const data = await res.json();
+            const newTodos = todos.filter((td) => td._id !== data._id);
+            setTodos(newTodos);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     return (
@@ -81,14 +92,19 @@ function TodoForm({ todos, setTodos }) {
     const [task, setTask] = useState("");
     async function handleNewTodo(e) {
         e.preventDefault();
-        const response = await fetch("http://localhost:3000/todo", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ task: task })
-        })
-        const data = await response.json();
-        console.log(data);
-        setTodos([...todos, data]);
+        const newTodo = { task: task };
+        try {
+            const res = await fetch("http://localhost:3000/todo", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newTodo)
+            })
+            const data = await res.json();
+            console.log(data);
+            setTodos([...todos, data]);
+        } catch (e) {
+            console.log(e);
+        }
         setTask("");
     }
 
